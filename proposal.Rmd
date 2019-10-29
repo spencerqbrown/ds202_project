@@ -11,7 +11,7 @@ Karthikcharan Suresh
 Spencer Brown (Coordinator)
  
 # Source
-The dataset is from another class that two of the group members are in. It was scraped directly from Airbnb by the course' professor, Dr. Laura Ziegler
+The dataset is from another class that two of the group members are in. It was scraped directly from Airbnb by the course' professor, Dr. Laura Ziegler. It can be found in csv format in the same repo as this file, at this link: https://github.com/spencerqbrown/ds202_project
 
 # Dataset Overview
 A random sample of 500 Airbnb listings from Chicago taken from all listings in Chicago from August 2008 to May 2017. The dataset contains attributes for each of the listings such as review scores, features of the listing (eg number of rooms, bathrooms, etc.), prices, location (coordinates, neighborhood), services provided (heat, wifi), rules (whether smoking or pets are allowed). 
