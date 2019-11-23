@@ -18,5 +18,5 @@ str(airbnb)
 airbnb_char = airbnb %>% mutate_at(c(2:12, 14, 18, 25), as.character)
 
 # Setting dates to date types
-library(lubridate)
+airbnb_char$host_since = as.Date(airbnb_char$host_since, format="%m/%d/%Y")
 ```

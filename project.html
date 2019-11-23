@@ -448,12 +448,7 @@ str(airbnb)</code></pre>
 airbnb_char = airbnb %&gt;% mutate_at(c(2:12, 14, 18, 25), as.character)
 
 # Setting dates to date types
-library(lubridate)</code></pre>
-<pre><code>## 
-## Attaching package: &#39;lubridate&#39;</code></pre>
-<pre><code>## The following object is masked from &#39;package:base&#39;:
-## 
-##     date</code></pre>
+airbnb_char$host_since = as.Date(airbnb_char$host_since, format=&quot;%m/%d/%Y&quot;)</code></pre>
 
 
 
