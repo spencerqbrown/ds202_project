@@ -7,4 +7,16 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+First, we need to clean up the dataset a bit.
+```{r}
+library(dplyr)
+library(tidyr)
 
+airbnb = read.csv("airbnb.csv")
+str(airbnb)
+# Setting descriptions, URLS, to character types
+airbnb_char = airbnb %>% mutate_at(c(2:12, 14, 18, 25), as.character)
+
+# Setting dates to date types
+library(lubridate)
+```
