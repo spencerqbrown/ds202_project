@@ -17,6 +17,19 @@ str(airbnb)
 # Setting descriptions, URLS, to character types
 airbnb_char = airbnb %>% mutate_at(c(2:12, 14, 18, 25), as.character)
 
+# Set numerics where they're needed
+library(stringr)
+airbnb_char$host_response_rate = as.numeric(str_remove(airbnb_char$host_response_rate, "%"))
+# all others should be properly formatted
+
+# Set boolean (logical) columns
+airbnb_char = airbnb %>% mutate_at(c(20, 23, 24, 29), as.character) # R won't reassign unless column is of character type
+airbnb_char[airbnb_char=="f"] = "false" # true and false are parseable by as.logical
+airbnb_char[airbnb_char=="t"] = "true"
+airbnb_log = airbnb_char %>% mutate_at(c(20, 23, 24, 29), as.logical)
+# boolean values are set to be TRUE and FALSE
+
 # Setting dates to date types
-airbnb_char$host_since = as.Date(airbnb_char$host_since, format="%m/%d/%Y")
+airbnb_log$host_since = as.Date(airbnb_log$host_since, format="%m/%d/%Y")
+# this is done last because it breaks slicing
 ```
