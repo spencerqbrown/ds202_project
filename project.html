@@ -454,18 +454,21 @@ airbnb_char$host_response_rate = as.numeric(str_remove(airbnb_char$host_response
 <pre class="r"><code># all others should be properly formatted
 
 # Set boolean (logical) columns
-airbnb_char = airbnb %&gt;% mutate_at(c(20, 23, 24, 29), as.character) # R won&#39;t reassign unless column is of character type
+airbnb_char = airbnb_char %&gt;% mutate_at(c(20, 23, 24, 29), as.character) # R won&#39;t reassign unless column is of character type
 airbnb_char[airbnb_char==&quot;f&quot;] = &quot;false&quot; # true and false are parseable by as.logical</code></pre>
 <pre><code>## Warning in `[&lt;-.factor`(`*tmp*`, thisvar, value = &quot;false&quot;): invalid factor
 ## level, NA generated</code></pre>
 <pre class="r"><code>airbnb_char[airbnb_char==&quot;t&quot;] = &quot;true&quot;</code></pre>
 <pre><code>## Warning in `[&lt;-.factor`(`*tmp*`, thisvar, value = &quot;true&quot;): invalid factor
 ## level, NA generated</code></pre>
-<pre class="r"><code>airbnb_log = airbnb_char %&gt;% mutate_at(c(20, 23, 24, 29), as.logical)
+<pre class="r"><code>airbnb_clean = airbnb_char %&gt;% mutate_at(c(20, 23, 24, 29), as.logical)
 # boolean values are set to be TRUE and FALSE
 
+# Set missing values to NA
+airbnb_clean[airbnb_clean==&quot;&quot;] = NA # Note: this should work for both character and factor variables
+
 # Setting dates to date types
-airbnb_log$host_since = as.Date(airbnb_log$host_since, format=&quot;%m/%d/%Y&quot;)
+airbnb_clean$host_since = as.Date(airbnb_clean$host_since, format=&quot;%m/%d/%Y&quot;)
 # this is done last because it breaks slicing</code></pre>
 
 

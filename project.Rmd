@@ -22,14 +22,21 @@ library(stringr)
 airbnb_char$host_response_rate = as.numeric(str_remove(airbnb_char$host_response_rate, "%"))
 # all others should be properly formatted
 
-# Set boolean (logical) columns
-airbnb_char = airbnb %>% mutate_at(c(20, 23, 24, 29), as.character) # R won't reassign unless column is of character type
+# Set boolean columns
+airbnb_char = airbnb_char %>% mutate_at(c(20, 23, 24, 29), as.character) # R won't reassign unless column is of character type
 airbnb_char[airbnb_char=="f"] = "false" # true and false are parseable by as.logical
 airbnb_char[airbnb_char=="t"] = "true"
-airbnb_log = airbnb_char %>% mutate_at(c(20, 23, 24, 29), as.logical)
+airbnb_clean = airbnb_char %>% mutate_at(c(20, 23, 24, 29), as.logical)
 # boolean values are set to be TRUE and FALSE
 
+# Set missing values to NA
+airbnb_clean[airbnb_clean==""] = NA # Note: this should work for both character and factor variables
+
 # Setting dates to date types
-airbnb_log$host_since = as.Date(airbnb_log$host_since, format="%m/%d/%Y")
+airbnb_clean$host_since = as.Date(airbnb_clean$host_since, format="%m/%d/%Y")
 # this is done last because it breaks slicing
+```
+
+Now, we can start with some exploration of individual variables.
+```{r}
 ```
