@@ -39,4 +39,39 @@ airbnb_clean$host_since = as.Date(airbnb_clean$host_since, format="%m/%d/%Y")
 
 Now, we can start with some exploration of individual variables.
 ```{r}
+library(ggplot2)
+
+# Let's look at some counts for factors to gauge their plottability
+# Unique host names:
+length(unique(airbnb_clean$host_name))
+# Unique host locations:
+length(unique(airbnb_clean$host_location))
+# Unique host neighborhoods:
+length(unique(airbnb_clean$host_neighbourhood))
+# Unique listing neighborhoods:
+length(unique(airbnb_clean$neighbourhood))
+# Unique room types:
+length(unique(airbnb_clean$room_type))
+# Unique bed types:
+length(unique(airbnb_clean$bed_type))
+
+
+# How about distributions of host start times?
+ggplot(airbnb_clean, aes(host_since)) + geom_histogram() + labs(x = "Start Date", y = "Count", title = "Distribution of Host Start Dates")
 ```
+
+## Host Data
+Let's look at some data involving individual hosts.
+```{r}
+
+```
+
+## Modeling
+We can predict some practical values using linear models. [Karthik]
+
+## Geographical Data
+The dataset provides useful location data for each listing that can provide some insight into different geographical areas. [Peter]
+
+## Text Data
+Several of the variables here come in the form of long text descriptions from which useful information can be pulled with some effort. [Kaleb]
+
