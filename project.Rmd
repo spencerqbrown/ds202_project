@@ -7,6 +7,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
+## Cleaning
 First, we need to clean up the dataset a bit.
 ```{r}
 library(dplyr)
@@ -23,10 +25,12 @@ airbnb_char$host_response_rate = as.numeric(str_remove(airbnb_char$host_response
 # all others should be properly formatted
 
 # Set boolean columns
-airbnb_char = airbnb_char %>% mutate_at(c(20, 23, 24, 29), as.character) # R won't reassign unless column is of character type
+airbnb_char = airbnb_char %>% mutate_at(c(20, 23, 24, 29, 52, 55:62), as.character) # R won't reassign unless column is of character type
 airbnb_char[airbnb_char=="f"] = "false" # true and false are parseable by as.logical
+airbnb_char[airbnb_char=="No"] = "false"
 airbnb_char[airbnb_char=="t"] = "true"
-airbnb_clean = airbnb_char %>% mutate_at(c(20, 23, 24, 29), as.logical)
+airbnb_char[airbnb_char=="Yes"] = "false"
+airbnb_clean = airbnb_char %>% mutate_at(c(20, 23, 24, 29, 52, 55:62), as.logical)
 # boolean values are set to be TRUE and FALSE
 
 # Set missing values to NA
@@ -37,10 +41,112 @@ airbnb_clean$host_since = as.Date(airbnb_clean$host_since, format="%m/%d/%Y")
 # this is done last because it breaks slicing
 ```
 
+## Initial EDA
 Now, we can start with some exploration of individual variables.
 ```{r}
 library(ggplot2)
+```
+First off, we'll look at distributions of some simple numerical variables.
+```{r}
+# While there are many libraries for this, we can easily whip up a quick summary statistics function
+summary_stats = function(variable) {
+  cat("Total Count: ", length(variable), "\n")
+  cat("N: ", sum(!is.na(variable)), "\n")
+  cat("Minimum: ", min(variable, na.rm = TRUE), "\n")
+  cat("Maximum: ", max(variable, na.rm = TRUE), "\n")
+  cat("Mean: ", mean(variable, na.rm = TRUE), "\n")
+  cat("Standard Deviation: ", sd(variable, na.rm = TRUE), "\n")
+  cat("Median: ", median(variable, na.rm = TRUE), "\n")
+  cat("Quantiles:", "\n")
+  print(quantile(as.numeric(variable), c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE))
+  cat("IQR: ", IQR(variable, na.rm = TRUE), "\n")
+}
+```
 
+Host response rate:
+```{r}
+summary_stats(airbnb_clean$host_response_rate)
+```
+Given that we have a median equal to our maximum, 100, along with such a high mean and low IQR, we clearly have a majority of hosts having a 100% response rate.
+
+Number of guests accommodated:
+```{r}
+summary_stats(airbnb_clean$accommodates)
+```
+Price:
+```{r}
+summary_stats(airbnb_clean$price)
+```
+We will get four price categories based on our quantiles, which we'll call very high, high, medium, and low, for later categorization use.
+```{r}
+low = quantile(airbnb_clean$price)[2]
+medium = quantile(airbnb_clean$price)[3]
+high = quantile(airbnb_clean$price)[4]
+
+price_category = vector(length = length(airbnb_clean$price))
+lowcheck = sum(airbnb_clean$price <= low)
+price_category[airbnb_clean$price <= low] = "low"
+print(lowcheck == sum(price_category == "low"))
+
+medcheck = sum(airbnb_clean$price > low & airbnb_clean$price <= medium)
+price_category[airbnb_clean$price > low & airbnb_clean$price <= medium] = "medium"
+print(medcheck == sum(price_category == "medium"))
+
+hicheck = sum(airbnb_clean$price > medium & airbnb_clean$price <= high)
+price_category[airbnb_clean$price > medium & airbnb_clean$price <= high] = "high"
+print(hicheck == sum(price_category == "high"))
+
+vcheck = sum(airbnb_clean$price > high)
+price_category[airbnb_clean$price > high] = "very high"
+print(vcheck == sum(price_category == "very high"))
+
+# All checks seem right, let's see if our distribution checks out:
+airbnb_clean$price_category = factor(price_category, levels = c("low", "medium", "high", "very high"))
+ggplot(airbnb_clean, aes(price_category)) + geom_bar() + labs(x = "Price Category", y = "Count", title = "Price Category Distributions")
+# Looks reasonably even.
+```
+
+Maximum nights:
+```{r}
+summary_stats(airbnb_clean$maximum_nights)
+```
+Note the high proportion of 1125s, probably the maximum allowed for a listing by the website.
+
+Reviews per month:
+```{r}
+summary_stats(airbnb_clean$reviews_per_month)
+```
+This gives an interesting variety, let's look at a histogram.
+```{r}
+ggplot(airbnb_clean, aes(reviews_per_month)) + geom_histogram() + labs(x = "Reviews Per Month", y = "Count", title = "Reviews Per Month Distribution")
+```
+
+We can see a right skew with a floor at 0, so we know most locations aren't reviewed many times per month.
+
+Cleanliness review score (out of 10):
+```{r}
+summary_stats(airbnb_clean$review_scores_cleanliness)
+```
+
+Communication review score (out of 10):
+```{r}
+summary_stats(airbnb_clean$review_scores_communication)
+```
+
+Value review score (out of 10):
+```{r}
+summary_stats(airbnb_clean$review_scores_value)
+```
+Seems like both review categories seem to tend toward the high end. A left skew is likely. Let's check:
+```{r}
+ggplot(airbnb_clean, aes(review_scores_cleanliness)) + geom_histogram() + labs(x = "Cleanliness Review Score", y = "Count", title = "Cleanliness Review Scores Distribution")
+ggplot(airbnb_clean, aes(review_scores_communication)) + geom_histogram() + labs(x = "Communication Review Score", y = "Count", title = "Communication Review Scores Distribution")
+ggplot(airbnb_clean, aes(review_scores_value)) + geom_histogram() + labs(x = "Value Review Score", y = "Count", title = "Value Review Scores Distribution")
+```
+
+Unsurprising. People tend to give high reviews in the dataset.
+
+```{r}
 # Let's look at some counts for factors to gauge their plottability
 # Unique host names:
 length(unique(airbnb_clean$host_name))
@@ -54,8 +160,20 @@ length(unique(airbnb_clean$neighbourhood))
 length(unique(airbnb_clean$room_type))
 # Unique bed types:
 length(unique(airbnb_clean$bed_type))
+```
+We can see that some variables have more values than are comfortably put into a bar graph, but we easily look at distributions for room and bed types.
+```{r}
+ggplot(airbnb_clean, aes(room_type, fill = price_category)) + geom_bar() + labs(x = "Room Type", y = "Count", title = "Distribution of Room Types")
+```
 
+So, we can see that most rooms are an entire home or apartment, many are private rooms, and very few are shared rooms. 
+```{r}
+ggplot(airbnb_clean, aes(bed_type)) + geom_bar() + labs(x = "Bed Type", y = "Count", title = "Distribution of Bed Types")
+```
 
+The overwhelming majority of beds are real beds, with very few out of the 500 total listings in the data set being airbeds, couches, futons, or pull-out sofas.
+
+```{r}
 # How about distributions of host start times?
 ggplot(airbnb_clean, aes(host_since)) + geom_histogram() + labs(x = "Start Date", y = "Count", title = "Distribution of Host Start Dates")
 ```
