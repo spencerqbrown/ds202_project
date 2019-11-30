@@ -677,10 +677,48 @@ ggplot(airbnb_clean, aes(host_since)) + geom_histogram() + labs(x = &quot;Start 
 <div id="host-data" class="section level2">
 <h2>Host Data</h2>
 <p>Let’s look at some data involving individual hosts.</p>
+<pre class="r"><code># A count of unique host id&#39;s will tell us how many hosts we have
+print(length(unique(airbnb_clean$host_id)))</code></pre>
+<pre><code>## [1] 461</code></pre>
+<pre class="r"><code># Out of curiosity, does this match the unique host names?
+print(length(unique(airbnb_clean$host_name)))</code></pre>
+<pre><code>## [1] 365</code></pre>
+<p>So, it seems at least one host (almost certainly more) has multiple listings available, given that our dataset has 500 listings. Also, hosts share names.</p>
+<p>What are some common names?</p>
+<pre class="r"><code>repeat_names = (sort(table(airbnb_clean$host_name), decreasing = TRUE))
+repeat_names[repeat_names &gt; 1]</code></pre>
+<pre><code>## 
+##           Joe        Sonder          John          Paul        Justin 
+##            10             9             7             7             6 
+##          Nick       Michael         Chris         David       Jessica 
+##             6             5             4             4             4 
+##         Laura          Lisa           Liz          Mark          Matt 
+##             4             4             4             4             4 
+##          Mike     The Flats        Amanda       Charles           Dan 
+##             4             4             3             3             3 
+##        Daniel      Freehand         James      Jennifer         Maria 
+##             3             3             3             3             3 
+##         Mario        Nicole         Sarah        Sharon     Stephanie 
+##             3             3             3             3             3 
+##           Tom           Ami        Andrew        Ashley   At Home Inn 
+##             3             2             2             2             2 
+##     Catherine   Christopher          Dana         Emily         Frank 
+##             2             2             2             2             2 
+##          Jane          Jeff         Jenny         Jimmy          Kari 
+##             2             2             2             2             2 
+##          Kate           Kim        Kristi          Leon       Liliana 
+##             2             2             2             2             2 
+##          Lori          Mary         Megan     Mejai Kai Melanie &amp; Joe 
+##             2             2             2             2             2 
+##        Monica       Natalia        Pamela         Peter       Rebecca 
+##             2             2             2             2             2 
+##          Ross         Steve         Terry        Thomas        Trevor 
+##             2             2             2             2             2</code></pre>
+<p>Some of these are obviously common names, eg Joe, John, Paul. Some seem to be a single business with multiple properties, like “At Home Inn” and “The Flats”. Similarly, we can find that our second most common host name, “Sonder”, is also such a business.</p>
 </div>
 <div id="modeling" class="section level2">
 <h2>Modeling</h2>
-<p>We can predict some practical values using linear models. [Karthik]</p>
+<p>We can predict some practical values using linear regression models. [Karthik]</p>
 </div>
 <div id="geographical-data" class="section level2">
 <h2>Geographical Data</h2>

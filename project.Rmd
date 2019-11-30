@@ -183,11 +183,26 @@ We have a left skewed distribution, meaning in this context that more currently 
 ## Host Data
 Let's look at some data involving individual hosts.
 ```{r}
+# A count of unique host id's will tell us how many hosts we have
+print(length(unique(airbnb_clean$host_id)))
+# Out of curiosity, does this match the unique host names?
+print(length(unique(airbnb_clean$host_name)))
+```
+So, it seems at least one host (almost certainly more) has multiple listings available, given that our dataset has 500 listings. Also, hosts share names.
 
+What are some common names?
+```{r}
+repeat_names = (sort(table(airbnb_clean$host_name), decreasing = TRUE))
+repeat_names[repeat_names > 1]
+```
+
+Some of these are obviously common names, eg Joe, John, Paul. Some seem to be a single business with multiple properties, like "At Home Inn" and "The Flats". Similarly, we can find that our second most common host name, "Sonder", is also such a business.
+
+```{r}
 ```
 
 ## Modeling
-We can predict some practical values using linear models. [Karthik]
+We can predict some practical values using linear regression models. [Karthik]
 
 ## Geographical Data
 The dataset provides useful location data for each listing that can provide some insight into different geographical areas. [Peter]
