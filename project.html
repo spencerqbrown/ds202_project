@@ -714,7 +714,104 @@ repeat_names[repeat_names &gt; 1]</code></pre>
 ##             2             2             2             2             2 
 ##          Ross         Steve         Terry        Thomas        Trevor 
 ##             2             2             2             2             2</code></pre>
-<p>Some of these are obviously common names, eg Joe, John, Paul. Some seem to be a single business with multiple properties, like “At Home Inn” and “The Flats”. Similarly, we can find that our second most common host name, “Sonder”, is also such a business.</p>
+<p>Some of these are obviously common names, eg Joe, John, Paul. Some seem to be a single business with multiple properties, like “At Home Inn” and “The Flats”. Similarly, we find that our second most common host name, “Sonder”, is also such a business with a bit of research.</p>
+<p>Let’s look at ratings by name</p>
+<pre class="r"><code># First, we make a total rating by adding the three rating types
+airbnb_clean = airbnb_clean %&gt;% mutate(review_scores_total = (review_scores_communication + review_scores_cleanliness + review_scores_value))
+avg_score_by_name = airbnb_clean %&gt;% group_by(host_name) %&gt;% summarize(avg = mean(review_scores_total))
+avg_score_by_name = na.omit(avg_score_by_name)
+avg_score_by_name = avg_score_by_name %&gt;% arrange(desc(avg))
+head(avg_score_by_name, 15)</code></pre>
+<pre><code>## # A tibble: 15 x 2
+##    host_name     avg
+##    &lt;fct&gt;       &lt;dbl&gt;
+##  1 Adi            30
+##  2 Alan           30
+##  3 Alex           30
+##  4 Alexander      30
+##  5 Ali            30
+##  6 Alissa         30
+##  7 Amber          30
+##  8 Amrit Rania    30
+##  9 Amy            30
+## 10 Andy           30
+## 11 Anjli          30
+## 12 Anna-Lisa      30
+## 13 Anne           30
+## 14 Anne-Marie     30
+## 15 April          30</code></pre>
+<p>We can see have a lot of 30/30 for total scores, meaning many people got very good ratings as mentioned earlier. Unique, however, are low scores. Let’s look at the bottom three.</p>
+<pre class="r"><code>tail(avg_score_by_name, 3)</code></pre>
+<pre><code>## # A tibble: 3 x 2
+##   host_name   avg
+##   &lt;fct&gt;     &lt;dbl&gt;
+## 1 Wilson       22
+## 2 Niki         20
+## 3 Sam          18</code></pre>
+<p>Since these three scores are unique, we can use them as keys for finding more info on the users. Had we used host_id, we could have used that as well, but here we used names for the sake of readability.</p>
+<pre class="r"><code>sam = airbnb_clean %&gt;% filter(review_scores_total == 18 &amp; host_name == &quot;Sam&quot;)
+niki = airbnb_clean %&gt;% filter(review_scores_total == 20 &amp; host_name == &quot;Niki&quot;)
+wilson = airbnb_clean %&gt;% filter(review_scores_total == 22 &amp; host_name == &quot;Wilson&quot;)</code></pre>
+<p>We can get a quick data frame of our three hosts of interest with host relevant data.</p>
+<pre class="r"><code>low_rated = rbind(sam, niki, wilson)</code></pre>
+<p>Let’s look at their ratings.</p>
+<pre class="r"><code># Note: 49, 50, 51 are the review score columns, 15 is host name
+low_rated[,c(15, 49:51)]</code></pre>
+<pre><code>##   host_name review_scores_cleanliness review_scores_communication
+## 1       Sam                         4                           8
+## 2      Niki                         6                           8
+## 3    Wilson                         6                           8
+##   review_scores_value
+## 1                   6
+## 2                   6
+## 3                   8</code></pre>
+<p>So, it seems that having good communication all around, the hosts have average to good value scores and poor to average cleanliness, their weakest factor in general. Let’s see how cleanliness generally compares to other review scores across all hosts.</p>
+<pre class="r"><code>avg_scores_by_name = airbnb_clean %&gt;% group_by(host_name) %&gt;% summarize(avg_cl = mean(review_scores_cleanliness), avg_com = mean(review_scores_communication), avg_val = mean(review_scores_value) , avg_total = mean(review_scores_total))
+avg_scores_by_name = na.omit(avg_scores_by_name)</code></pre>
+<p>Now, we can look at summary stats of each rating variable</p>
+<p>Cleanliness:</p>
+<pre class="r"><code>summary_stats(avg_scores_by_name$avg_cl)</code></pre>
+<pre><code>## Total Count:  292 
+## N:  292 
+## Minimum:  4 
+## Maximum:  10 
+## Mean:  9.477645 
+## Standard Deviation:  0.8622203 
+## Median:  10 
+## Quantiles: 
+##   0%  25%  50%  75% 100% 
+##    4    9   10   10   10 
+## IQR:  1</code></pre>
+<p>Communication:</p>
+<pre class="r"><code>summary_stats(avg_scores_by_name$avg_com)</code></pre>
+<pre><code>## Total Count:  292 
+## N:  292 
+## Minimum:  8 
+## Maximum:  10 
+## Mean:  9.860826 
+## Standard Deviation:  0.3800228 
+## Median:  10 
+## Quantiles: 
+##   0%  25%  50%  75% 100% 
+##    8   10   10   10   10 
+## IQR:  0</code></pre>
+<p>Value:</p>
+<pre class="r"><code>summary_stats(avg_scores_by_name$avg_val)</code></pre>
+<pre><code>## Total Count:  292 
+## N:  292 
+## Minimum:  6 
+## Maximum:  10 
+## Mean:  9.585331 
+## Standard Deviation:  0.6301351 
+## Median:  10 
+## Quantiles: 
+##   0%  25%  50%  75% 100% 
+##    6    9   10   10   10 
+## IQR:  1</code></pre>
+<p>We can see that thought our base review scores don’t vary too much in mean, cleanliness has the lowest mean (~9.48), the lowest minimum (4), and the highest standard deviation (~0.862). So, there does seem to be a bit of a lower lump in the tail of our distribution (which we saw in the histograms above). Let’s see how many 4s we actually have.</p>
+<pre class="r"><code>sum(na.omit(airbnb_clean$review_scores_cleanliness) == 4)</code></pre>
+<pre><code>## [1] 1</code></pre>
+<p>Just one it seems. Though we only have 500 listings,</p>
 </div>
 <div id="modeling" class="section level2">
 <h2>Modeling</h2>
