@@ -166,7 +166,7 @@ We can see that some variables have more values than are comfortably put into a 
 ggplot(airbnb_clean, aes(room_type, fill = price_category)) + geom_bar() + labs(x = "Room Type", y = "Count", title = "Distribution of Room Types")
 ```
 
-So, we can see that most rooms are an entire home or apartment, many are private rooms, and very few are shared rooms. 
+So, we can see that most rooms are an entire home or apartment, many are private rooms, and very few are shared rooms. Note that the majority of high and very high prices appear in the entire home category, unsurprisingly. Most low prices are in the private room category. While private rooms are not the least luxurious, they are much more common than shared rooms, which have a much higher proportion of low prices within its room category. In summary, higher price means more private space.
 ```{r}
 ggplot(airbnb_clean, aes(bed_type)) + geom_bar() + labs(x = "Bed Type", y = "Count", title = "Distribution of Bed Types")
 ```
@@ -177,6 +177,8 @@ The overwhelming majority of beds are real beds, with very few out of the 500 to
 # How about distributions of host start times?
 ggplot(airbnb_clean, aes(host_since)) + geom_histogram() + labs(x = "Start Date", y = "Count", title = "Distribution of Host Start Dates")
 ```
+
+We have a left skewed distribution, meaning in this context that more currently active hosts started more recently than not. Ie, there has likely either been a sharp rise in hosts in the area over time or hosts tend to host for a short amount of time before quitting, leading to the active hosts beginning more recently. The former is more obvious, but we would need data about inactive hosts to rule out the latter.
 
 ## Host Data
 Let's look at some data involving individual hosts.
