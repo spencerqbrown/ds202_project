@@ -1,6 +1,6 @@
 ---
 title: "Chicago Airbnb Listings"
-output: powerpoint_presentation
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -112,9 +112,9 @@ Price:
 ```{r}
 summary_stats(airbnb_clean$price)
 ```
-::: notes
+
 We will get four price categories based on our quantiles, which we'll call very high, high, medium, and low, for later categorization use.
-:::
+
 ---
 ---
 
@@ -151,26 +151,26 @@ Maximum nights:
 ```{r}
 summary_stats(airbnb_clean$maximum_nights)
 ```
-::: notes
+
 Note the high proportion of 1125s, probably the maximum allowed for a listing by the website.
-:::
+
 ---
 Reviews per month:
 ```{r}
 summary_stats(airbnb_clean$reviews_per_month)
 ```
-::: notes
+
 This gives an interesting variety, let's look at a histogram.
-:::
+
 ---
 ```{r}
 ggplot(airbnb_clean, aes(reviews_per_month)) + geom_histogram() + labs(x = "Reviews Per Month", y = "Count", title = "Reviews Per Month Distribution")
 ```
 
-::: notes
+
 We can see a right skew with a floor at 0, so we know most locations aren't reviewed many times per month.
-:::
----
+
+
 Cleanliness review score (out of 10):
 ```{r}
 summary_stats(airbnb_clean$review_scores_cleanliness)
@@ -186,18 +186,18 @@ Value review score (out of 10):
 summary_stats(airbnb_clean$review_scores_value)
 ```
 
-::: notes
+
 Seems like all three review categories seem to tend toward the high end. A left skew is likely. Let's check:
-:::
+
 ```{r}
 ggplot(airbnb_clean, aes(review_scores_cleanliness)) + geom_histogram() + labs(x = "Cleanliness Review Score", y = "Count", title = "Cleanliness Review Scores Distribution")
 ggplot(airbnb_clean, aes(review_scores_communication)) + geom_histogram() + labs(x = "Communication Review Score", y = "Count", title = "Communication Review Scores Distribution")
 ggplot(airbnb_clean, aes(review_scores_value)) + geom_histogram() + labs(x = "Value Review Score", y = "Count", title = "Value Review Scores Distribution")
 ```
 
-::: notes
+
 Unsurprising. People tend to give high reviews in the dataset.
-:::
+
 
 ```{r}
 # Let's look at some counts for factors to gauge their plottability
@@ -214,28 +214,28 @@ length(unique(airbnb_clean$room_type))
 # Unique bed types:
 length(unique(airbnb_clean$bed_type))
 ```
-::: notes
+
 We can see that some variables have more values than are comfortably put into a bar graph, but we easily look at distributions for room and bed types.
-:::
+
 ```{r}
 ggplot(airbnb_clean, aes(room_type, fill = price_category)) + geom_bar() + labs(x = "Room Type", y = "Count", title = "Distribution of Room Types")
 ```
-::: notes
+
 So, we can see that most rooms are an entire home or apartment, many are private rooms, and very few are shared rooms. Note that the majority of high and very high prices appear in the entire home category, unsurprisingly. Most low prices are in the private room category. While private rooms are not the least luxurious, they are much more common than shared rooms, which have a much higher proportion of low prices within its room category. In summary, higher price means more private space.
-:::
+
 ```{r}
 ggplot(airbnb_clean, aes(bed_type)) + geom_bar() + labs(x = "Bed Type", y = "Count", title = "Distribution of Bed Types")
 ```
-::: notes
+
 The overwhelming majority of beds are real beds, with very few out of the 500 total listings in the data set being airbeds, couches, futons, or pull-out sofas.
-:::
+
 ```{r}
 # How about distributions of host start times?
 ggplot(airbnb_clean, aes(host_since)) + geom_histogram() + labs(x = "Start Date", y = "Count", title = "Distribution of Host Start Dates")
 ```
-::: notes
+
 We have a left skewed distribution, meaning in this context that more currently active hosts started more recently than not. Ie, there has likely either been a sharp rise in hosts in the area over time or hosts tend to host for a short amount of time before quitting, leading to the active hosts beginning more recently. The former is more obvious, but we would need data about inactive hosts to rule out the latter.
-:::
+
 ## Host Data
 Let's look at some data involving individual hosts.
 ```{r}
@@ -244,22 +244,22 @@ print(length(unique(airbnb_clean$host_id)))
 # Out of curiosity, does this match the unique host names?
 print(length(unique(airbnb_clean$host_name)))
 ```
-::: notes
+
 So, it seems at least one host (almost certainly more) has multiple listings available, given that our dataset has 500 listings. Also, hosts share names.
-:::
+
 
 What are some common names?
 ```{r}
 repeat_names = (sort(table(airbnb_clean$host_name), decreasing = TRUE))
 repeat_names[repeat_names > 1]
 ```
-::: notes
-Some of these are obviously common names, eg Joe, John, Paul. Some seem to be a single business with multiple properties, like "At Home Inn" and "The Flats". Similarly, we find that our second most common host name, "Sonder", is also such a business with a bit of research.
-:::
 
-::: notes
+Some of these are obviously common names, eg Joe, John, Paul. Some seem to be a single business with multiple properties, like "At Home Inn" and "The Flats". Similarly, we find that our second most common host name, "Sonder", is also such a business with a bit of research.
+
+
+
 Let's look at ratings by name
-:::
+
 ```{r}
 # First, we make a total rating by adding the three rating types
 airbnb_clean = airbnb_clean %>% mutate(review_scores_total = (review_scores_communication + review_scores_cleanliness + review_scores_value))
@@ -268,43 +268,43 @@ avg_score_by_name = na.omit(avg_score_by_name)
 avg_score_by_name = avg_score_by_name %>% arrange(desc(avg))
 head(avg_score_by_name, 15)
 ```
-::: notes
+
 We can see have a lot of 30/30 for total scores, meaning many people got very good ratings as mentioned earlier. Unique, however, are low scores. Let's look at the bottom three.
-:::
+
 ```{r}
 tail(avg_score_by_name, 3)
 ```
-::: notes
+
 Since these three scores are unique, we can use them as keys for finding more info on the users. Had we used host_id, we could have used that as well, but here we used names for the sake of readability.
-:::
+
 ```{r}
 sam = airbnb_clean %>% filter(review_scores_total == 18 & host_name == "Sam")
 niki = airbnb_clean %>% filter(review_scores_total == 20 & host_name == "Niki")
 wilson = airbnb_clean %>% filter(review_scores_total == 22 & host_name == "Wilson")
 ```
-::: notes
+
 We can get a quick data frame of our three hosts of interest with host relevant data.
-:::
+
 ```{r}
 low_rated = rbind(sam, niki, wilson)
 ```
-::: notes
+
 Let's look at their ratings.
-:::
+
 ```{r}
 # Note: 49, 50, 51 are the review score columns, 15 is host name
 low_rated[,c(15, 49:51)]
 ```
-::: notes
+
 So, it seems that having good communication all around, the hosts have average to good value scores and poor to average cleanliness, their weakest factor in general. Let's see how cleanliness generally compares to other review scores across all hosts.
-:::
+
 ```{r}
 avg_scores_by_name = airbnb_clean %>% group_by(host_name) %>% summarize(avg_cl = mean(review_scores_cleanliness), avg_com = mean(review_scores_communication), avg_val = mean(review_scores_value) , avg_total = mean(review_scores_total))
 avg_scores_by_name = na.omit(avg_scores_by_name)
 ```
-::: notes
+
 Now, we can look at summary stats of each rating variable
-:::
+
 Cleanliness:
 ```{r}
 summary_stats(avg_scores_by_name$avg_cl)
@@ -317,18 +317,26 @@ Value:
 ```{r}
 summary_stats(avg_scores_by_name$avg_val)
 ```
-::: notes
+
 We can see that thought our base review scores don't vary too much in mean, cleanliness has the lowest mean (~9.48), the lowest minimum (4), and the highest standard deviation (~0.862). So, there does seem to be a bit of a lower lump in the tail of our distribution (which we saw in the histograms above). Let's see how many 4s we actually have.
-:::
+
 ```{r}
 sum(na.omit(airbnb_clean$review_scores_cleanliness) == 4)
 ```
-::: notes
+
 Just one it seems. Though we only have 500 listings, it seems Sam's is particularly dirty.
-:::
+
 
 ## Modeling
-We can predict some practical values using linear regression models. [Karthik]
+We can predict some practical values using linear regression models.  
+str(airbnb_clean)
+```{r}
+fit = lm(price ~bedrooms + bathrooms + accommodates ,data=airbnb_clean)
+ summary(fit)
+```
+So here our F Statistic is 90.59 on 3 and p-value p-value: < 0.0001 indicating that our model is useful for predicting prices but the R-adjusted and R values are significantly lower 0.3505 which is 35.05% of the variability.
+
+
 
 ## Geographical Data
 The dataset provides useful location data for each listing that can provide some insight into different geographical areas.
@@ -427,4 +435,88 @@ ggplot(data=airbnb_clean2, aes(x=reorder(neighbourhood,-price), y=accommodates))
 
 ## Text Data
 Several of the variables here come in the form of long text descriptions from which useful information can be pulled with some effort. [Kaleb]
+```{r}
+library(stringi)
+downtown <- stri_detect_fixed(airbnb_clean$name, "Downtown")
+modern <- stri_detect_fixed(airbnb_clean$name, "Modern")
+charming <- stri_detect_fixed(airbnb_clean$name, "Charming")
+cozy <- stri_detect_fixed(airbnb_clean$name, "Cozy")
+```
+
+---
+
+Now we will look to see if there are any cases where the price is generally higher if a certain word is included:
+
+Downtown:
+```{r}
+ggplot(airbnb_clean, aes(downtown, price)) +geom_point()
+```
+
+---
+
+Modern:
+```{r}
+ggplot(airbnb_clean, aes(modern, price)) +geom_point()
+```
+
+---
+
+Charming:
+```{r}
+ggplot(airbnb_clean, aes(charming, price)) +geom_point()
+```
+
+---
+
+Cozy:
+```{r}
+ggplot(airbnb_clean, aes(cozy, price)) +geom_point()
+```
+
+
+---
+
+Let's see if the effect of having access to certain types of transportation show up in terms of a price change
+
+```{r}
+bus <- stri_detect_fixed(airbnb_clean$transit,"bus")
+ggplot(airbnb_clean, aes(bus, price)) + geom_point()
+```
+
+---
+
+Lets compare that to entries that contain "car" :
+```{r}
+car <- stri_detect_fixed(airbnb_clean$transit, "car")
+ggplot(airbnb_clean, aes(car, price)) + geom_point()
+```
+
+---
+
+We should take a look at the length of the title and see what that can tell us:
+```{r}
+L.name <- stri_length(airbnb_clean$name)
+ggplot(airbnb_clean, aes(L.name, price)) + geom_point()
+```
+
+---
+
+Let's do the same thing with the summary and description:
+
+```{r}
+L.summary <- stri_length(airbnb_clean$summary)
+ggplot(airbnb_clean, aes(L.summary, price)) + geom_point()
+```
+
+---
+
+```{r}
+L.description <- stri_length(airbnb_clean$description)
+ggplot(airbnb_clean, aes(L.description, price)) + geom_point()
+```
+
+---
+
+
+
 
