@@ -7,6 +7,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## Background
+Our dataset is made up of a random sample of 500 Airbnb listings from Chicago taken from all listings in Chicago from August 2008 to May 2017. The dataset contains attributes for each of the listings such as review scores, features of the listing (eg number of rooms, bathrooms, etc.), prices, location (coordinates, neighborhood), services provided (heat, wifi), rules (whether smoking or pets are allowed). The data was scraped by Professor Laura Ziegler of the ISU statistics department.
 
 ## Cleaning
 
