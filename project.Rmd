@@ -200,6 +200,12 @@ ggplot(airbnb_clean, aes(room_type, fill = price_category)) + geom_bar() + labs(
 
 So, we can see that most rooms are an entire home or apartment, many are private rooms, and very few are shared rooms. Note that the majority of high and very high prices appear in the entire home category, unsurprisingly. Most low prices are in the private room category. While private rooms are not the least luxurious, they are much more common than shared rooms, which have a much higher proportion of low prices within its room category. In summary, higher price means more private space.
 
+We can make this a bit clearer:
+```{r}
+ggplot(airbnb_clean, aes(room_type, fill = price_category)) + geom_bar(position = "fill") + labs(x = "Room Type", y = "Count", title = "Distribution of Room Types")
+```
+
+With a clearer view of proportions, we can see that very high and high are fairly similar between private and shared rooms, though low price dominates shared rooms. Between entire homes and private rooms, medium price grows with less space, while high and very high prices become less common.
 ```{r}
 ggplot(airbnb_clean, aes(bed_type)) + geom_bar() + labs(x = "Bed Type", y = "Count", title = "Distribution of Bed Types")
 ```
@@ -303,6 +309,25 @@ sum(na.omit(airbnb_clean$review_scores_cleanliness) == 4)
 
 Just one it seems. Though we only have 500 listings, it seems Sam's is particularly dirty.
 
+Maybe hosts based in Chicago are more available for cleaning:
+```{r}
+airbnb_clean$localhost = ifelse(airbnb_clean$host_location == "Chicago, Illinois, United States", TRUE, FALSE)
+ggplot(airbnb_clean, aes(localhost, review_scores_total)) + geom_boxplot() + labs(x = "Host is Local", y = "Cleanliness Review Score", title = "Cleanliness Score by Locality")
+```
+
+It appears there isn't too big of a different, though we can see our minimum cleanliness (Sam) is not a local host. Let's look at the differences in numbers:
+
+```{r}
+local = airbnb_clean %>% filter(localhost == TRUE)
+nonlocal = airbnb_clean %>% filter(localhost == FALSE)
+```
+```{r}
+summary_stats(local$review_scores_cleanliness)
+```
+```{r}
+summary_stats(nonlocal$review_scores_cleanliness)
+```
+We can see that there aren't very many non-local hosts in general, so we're pulling from a smaller sample size of them. Non-local hosts have a slightly lower mean cleanliness score, though not by much. It seems non-local hosts are generally just as good at keeping their listings clean. We can look at relationships between some more variables with linear models below.
 
 ## Modeling
 We can predict some practical values using linear regression models.  
