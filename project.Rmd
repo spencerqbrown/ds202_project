@@ -7,16 +7,13 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
----
+
 ## Cleaning
-::: notes
-First, we need to clean up the dataset a bit.
-:::
+
 ```{r}
 library(dplyr)
 ```
----
----
+
 ```{r}
 library(tidyr)
 
@@ -24,9 +21,7 @@ airbnb = read.csv("airbnb.csv")
 str(airbnb)
 # Setting descriptions, URLS, to character types
 ```
----
 
----
 ```{r}
 airbnb_char = airbnb %>% mutate_at(c(2:12, 14, 18, 25), as.character)
 
@@ -35,9 +30,7 @@ library(stringr)
 airbnb_char$host_response_rate = as.numeric(str_remove(airbnb_char$host_response_rate, "%"))
 # all others should be properly formatted
 ```
----
 
----
 ```{r}
 
 # Set boolean columns
@@ -49,9 +42,7 @@ airbnb_char[airbnb_char=="Yes"] = "true"
 airbnb_clean = airbnb_char %>% mutate_at(c(20, 23, 24, 29, 52, 55:62), as.logical)
 # boolean values are set to be TRUE and FALSE
 ```
----
 
----
 ```{r}
 # Set missing values to NA
 airbnb_clean[airbnb_clean==""] = NA # Note: this should work for both character and factor variables
@@ -60,20 +51,16 @@ airbnb_clean[airbnb_clean==""] = NA # Note: this should work for both character 
 airbnb_clean$host_since = as.Date(airbnb_clean$host_since, format="%m/%d/%Y")
 # this is done last because it breaks slicing
 ```
----
 
----
 ## Initial EDA
-::: notes
+
 Now, we can start with some exploration of individual variables.
 First off, we'll look at distributions of some simple numerical variables.
-:::
+
 ```{r}
 library(ggplot2)
 ```
----
 
----
 ```{r}
 # While there are many libraries for this, we can easily whip up a quick summary statistics function
 summary_stats = function(variable) {
@@ -89,25 +76,19 @@ summary_stats = function(variable) {
   cat("IQR: ", IQR(variable, na.rm = TRUE), "\n")
 }
 ```
----
 
----
 Host response rate:
 ```{r}
 summary_stats(airbnb_clean$host_response_rate)
 ```
-::: notes
-Given that we have a median equal to our maximum, 100, along with such a high mean and low IQR, we clearly have a majority of hosts having a 100% response rate.
-:::
 
----
+Given that we have a median equal to our maximum, 100, along with such a high mean and low IQR, we clearly have a majority of hosts having a 100% response rate.
+
 Number of guests accommodated:
 ```{r}
 summary_stats(airbnb_clean$accommodates)
 ```
----
 
----
 Price:
 ```{r}
 summary_stats(airbnb_clean$price)
@@ -115,10 +96,6 @@ summary_stats(airbnb_clean$price)
 
 We will get four price categories based on our quantiles, which we'll call very high, high, medium, and low, for later categorization use.
 
----
----
-
----
 ```{r}
 low = quantile(airbnb_clean$price)[2]
 medium = quantile(airbnb_clean$price)[3]
@@ -146,7 +123,7 @@ airbnb_clean$price_category = factor(price_category, levels = c("low", "medium",
 ggplot(airbnb_clean, aes(price_category)) + geom_bar() + labs(x = "Price Category", y = "Count", title = "Price Category Distributions")
 # Looks reasonably even.
 ```
----
+
 Maximum nights:
 ```{r}
 summary_stats(airbnb_clean$maximum_nights)
@@ -154,7 +131,6 @@ summary_stats(airbnb_clean$maximum_nights)
 
 Note the high proportion of 1125s, probably the maximum allowed for a listing by the website.
 
----
 Reviews per month:
 ```{r}
 summary_stats(airbnb_clean$reviews_per_month)
@@ -162,7 +138,6 @@ summary_stats(airbnb_clean$reviews_per_month)
 
 This gives an interesting variety, let's look at a histogram.
 
----
 ```{r}
 ggplot(airbnb_clean, aes(reviews_per_month)) + geom_histogram() + labs(x = "Reviews Per Month", y = "Count", title = "Reviews Per Month Distribution")
 ```
